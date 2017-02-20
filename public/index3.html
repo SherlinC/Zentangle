@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Zentangle 2 page</title>
+	<meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+	<link rel="stylesheet" href="css/normalize.min.css">
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+		<div class="logo">
+			<a href="home.html"><img src="img/logo.png" title="Zentangle" alt="Zentangle"/></a>
+		</div>
+
+		<div id="menu_icon"></div>
+		<nav>
+			<ul>
+				<li><a href="home.html" class="selected">Home</a></li>
+				<li><a href="about.html">About Zentangle</a></li>
+			</ul>
+		</nav>
+			<div class="rights" style="height: 400px">
+				<p>Copyright © 2016 Sherlinchen.</p>
+			
+			</div>
+		</div >
+	</header>
+
+
+
+   <div class="leftcontent">
+            <div class="work">
+    	           <img class="pic"
+    	              src="img/trees.jpg"  style="width:200px">
+				
+            </div>
+            
+            <div class="tip">
+    	            <img  class="pic" src="img/cham.jpg" style="width:200px">
+				
+            </div>
+            
+            <div class="tip">
+    	            <img  class="pic" src="img/work3.jpg" style="width:200px">
+				
+            </div>
+   </div>
+
+	<div id="canvas-container"></div>
+	<!-- Don't add this as a file!
+		 The path will be created when you run the server -->
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="js/jquery-min.js"></script>
+	<!-- <script type="text/javascript" src="js/sketch.js"></script> -->
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/p5.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/addons/p5.dom.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/addons/p5.sound.js"></script>
+	<script>
+	var app = app || {};
+
+app.main = (function() {
+	console.log('Your code starts here!');
+
+	var socket;
+	
+
+	var sketch = function(p) {
+		// your global var for your p5 sketch here
+        var painting;
+
+        p.preload = function(){
+        	painting = p.loadImage("../img/painting.png");
+        }
+
+		// p5 setup
+		p.setup = function() {
+			p.createCanvas(600, 600);
+			// p.background(0);
+			// console.log(test);
+			
+			p.image(painting,0,0);
+			// Start a socket connection to the server
+			socket = io.connect();
+			// We make a named event called 'mouse' and write an anonymous callback function
+			socket.on('index3',
+			// When we receive data
+				function(data) {
+				  console.log("Got: " + data.x + " " + data.y);
+				  // Draw a blue circle
+				  p.fill(120);
+				  p.noStroke();
+				  p.ellipse(data.x,data.y,5,5);
+				  
+				}
+			);
+		};
+
+		p.draw = function() {
+		    // Nothing
+		};
+
+		p.mouseDragged = function() {
+			// Draw some white circles
+			p.fill(10);
+			p.noStroke();
+			p.ellipse(p.mouseX,p.mouseY,5,5);
+
+			console.log("sendmouse: " + p.mouseX + " " + p.mouseY);
+
+			// Store the mouse coordinates
+			var data = {
+				x: p.mouseX,
+				y: p.mouseY
+			};
+
+			// And send that object to the socket
+			socket.emit('index3',data);
+		};
+
+	};
+
+	var init = function(){
+		console.log('Initializing app.');
+
+		// If you are writing long programs that mix multiple JS libraries,
+		// you might want to start your P5 sketch in an "instance mode".
+		// One of the benefits is that it enables you to run multiple P5 sketch in one program.
+		// Learn more: https://github.com/processing/p5.js/wiki/p5.js-overview#instantiation--namespace
+		var myp5 = new p5(sketch);
+
+		// Optionally, you can specify a default container for the canvas and any other elements to append to with a second argument. Like this:
+		// var myp5 = new p5(sketch, 'canvas-container');
+	};
+
+	return {
+		init: init
+	};
+
+})();
+
+window.addEventListener('DOMContentLoaded', app.main.init);
+</script>
+</body>
+</html>
